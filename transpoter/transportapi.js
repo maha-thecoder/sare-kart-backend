@@ -25,13 +25,15 @@ const usercreatepage=async(req,res)=>{
 
         const addinguser=await loginsection.create({username, phone: userphoneno})
         console.log("✅ User created:", addinguser._id);
+        const isProd = process.env.NODE_ENV === "production";
+
 
         // Set cookie BEFORE sending response
         res.cookie("uid", addinguser._id.toString(), {
             httpOnly: true,
-            sameSite: "none",
+            sameSite:isProd ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            secure: process.env.NODE_ENV === "production",
+            secure: isProd,
             path: "/"
 
         });
@@ -63,12 +65,15 @@ const userloginpage=async(req,res)=>{
             return res.status(401).json({message:"User not found"})
         }
 
+                const isProd = process.env.NODE_ENV === "production";
+
+
         // Set cookie BEFORE sending response
         res.cookie("uid", userfind._id.toString(), {
             httpOnly: true,
-            sameSite: "none",
+            sameSite: isProd ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            secure: process.env.NODE_ENV === "production",
+            secure: isProd,
             path: "/"
 
         });
@@ -89,6 +94,7 @@ const userloginpage=async(req,res)=>{
 const getuserorderdetails = async (req, res) => {
     try {
         const userId = req.cookies.uid;
+        console.log(userId)
         
         if (!userId) {
             return res.status(400).json({ message: "User ID not found in cookies" });
@@ -234,6 +240,25 @@ const getSareDetails = async (req, res) => {
     }
 }
 
+const authorization=async(req,res)=>{
+    try{
+    const uid=req.cookies.uid
+    console.log(uid)
+
+    if(!uid){
+        return res.status(401).json({msg:'no user found'})
+    }
+
+    res.status(200).json({authenticated:true})
+}
+catch(err){
+    console.log(err.message)
+    return res.status(500).json({error:err.message})
+    
+
+}
+}
+
 module.exports={
     usercreatepage,
     userloginpage,
@@ -242,5 +267,6 @@ module.exports={
     getAllOrders,
     createSareDetails,
     getSareDetails,
-    getuserorderdetails
+    getuserorderdetails,
+    authorization
 }
