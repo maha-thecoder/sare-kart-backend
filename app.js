@@ -8,7 +8,7 @@ const cookieParser=require('cookie-parser')
 const controller=require("./controller/controller")
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://sarekart.vercel.app/'  // ✅ no trailing slash!
+  'https://sarekart.vercel.app'
 ];
 
 app.use(cors({
