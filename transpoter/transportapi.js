@@ -94,7 +94,7 @@ const getuserorderdetails = async (req, res) => {
             return res.status(400).json({ message: "User ID not found in cookies" });
         }
 
-        const userorders = await Order.find(userId).sort({ createdAt: -1 });
+        const userorders = await Order.find({ userid: userId }).sort({ createdAt: -1 });
 
         if (!userorders || userorders.length === 0) {
             return res.status(200).json({ data: [], message: "No orders found" });
