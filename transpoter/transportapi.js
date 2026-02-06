@@ -27,10 +27,13 @@ const usercreatepage=async(req,res)=>{
         console.log("✅ User created:", addinguser._id);
 
         // Set cookie BEFORE sending response
-        res.cookie("uid", addinguser._id.toString(), {
+        res.cookie("uid", userfind._id.toString(), {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === "production",
+            path: "/"
+
         });
 
         res.status(200).json({  
@@ -63,8 +66,11 @@ const userloginpage=async(req,res)=>{
         // Set cookie BEFORE sending response
         res.cookie("uid", userfind._id.toString(), {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === "production",
+            path: "/"
+
         });
 
         res.status(200).json({  
