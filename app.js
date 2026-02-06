@@ -3,6 +3,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 const cors=require("cors")
 const {mongodb}=require("./dbconnect/mongoconnect")
+const cookieParser=require('cookie-parser')
 
 const controller=require("./controller/controller")
 const allowedOrigins = [
@@ -22,6 +23,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE',"PATCH"],
   credentials: true
 }));
+app.use(cookieParser())
 
 app.use(express.json());
 

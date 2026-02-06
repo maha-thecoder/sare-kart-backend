@@ -9,21 +9,29 @@ const usercreatepage=async(req,res)=>{
         console.log("📝 Signup Request Body:", req.body);
         
         const userdata=req.body;
-        const userphoneno=userdata.phone;
+        const userphoneno = String(userdata.phone || "").trim();
+        const username = String(userdata.username || "").trim();
 
-        if(!userphoneno || !userdata.password || !userdata.username){
-            console.log("❌ Missing required fields");
-            return res.status(400).json({message:"Username, phone, and password are required"})
+        if(!userphoneno || !username){
+            console.log("❌ Missing required fields - phone:", userphoneno, "username:", username);
+            return res.status(400).json({message:"Username and phone number are required"})
         }
 
         const userfind=await loginsection.findOne({phone:userphoneno})
         if(userfind){
-            console.log("⚠️ User already exists");
-            return res.status(400).json({message:"user already exist"})
+            console.log("⚠️ User already exists with phone:", userphoneno);
+            return res.status(400).json({message:"User with this phone number already exists"})
         }
 
-        const addinguser=await loginsection.create(userdata)
+        const addinguser=await loginsection.create({username, phone: userphoneno})
         console.log("✅ User created:", addinguser._id);
+
+        // Set cookie BEFORE sending response
+        res.cookie("uid", addinguser._id.toString(), {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false
+        });
 
         res.status(200).json({  
             message:"Account created successfully",
@@ -41,10 +49,10 @@ const usercreatepage=async(req,res)=>{
 
 const userloginpage=async(req,res)=>{
     try{
-        const {phone,password}=req.body;
+        const {phone}=req.body;
         
-        if(!phone || !password){
-            return res.status(400).json({message:"Phone and password are required"})
+        if(!phone){
+            return res.status(400).json({message:"Phone is required"})
         }
 
         const userfind=await loginsection.findOne({phone:phone})
@@ -52,10 +60,12 @@ const userloginpage=async(req,res)=>{
             return res.status(401).json({message:"User not found"})
         }
 
-        const isPasswordMatch=await bcrypt.compare(password,userfind.password)
-        if(!isPasswordMatch){
-            return res.status(401).json({message:"Incorrect password"})
-        }
+        // Set cookie BEFORE sending response
+        res.cookie("uid", userfind._id.toString(), {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false
+        });
 
         res.status(200).json({  
             message:"Login successful",
@@ -67,6 +77,28 @@ const userloginpage=async(req,res)=>{
         return res.status(500).json({ error: err.message });
     }
 
+}
+
+
+const getuserorderdetails = async (req, res) => {
+    try {
+        const userId = req.cookies.uid;
+        
+        if (!userId) {
+            return res.status(400).json({ message: "User ID not found in cookies" });
+        }
+
+        const userorders = await Order.find(userId).sort({ createdAt: -1 });
+
+        if (!userorders || userorders.length === 0) {
+            return res.status(200).json({ data: [], message: "No orders found" });
+        }
+
+        res.status(200).json({ data: userorders });
+    } catch (err) {
+        console.error("❌ Get user order details error:", err.message);
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 
@@ -100,7 +132,9 @@ const useraddressdetails = async (req, res) => {
 const createOrder = async (req, res) => {
     try {
         console.log("🧾 Create order:", req.body);
-        const { cart, total, address, paymentMethod } = req.body;
+        const { cart, total, address, paymentMethod, userid } = req.body;
+        const cookieUserId = req.cookies.uid;
+        
         if (!Array.isArray(cart) || cart.length === 0) {
             return res.status(400).json({ message: "Cart is required" });
         }
@@ -135,16 +169,17 @@ const createOrder = async (req, res) => {
         }
 
         const orderData = {
+            userid:cookieUserId, // Use userid from request body or cookies
             cart,
             total,
             deliveryAddress: deliveryAddressId,
             addressSnapshot,
-            paymentMethod: 'COD',
+            paymentMethod: paymentMethod || 'COD',
             status: 'pending'
         };
 
         const createdOrder = await Order.create(orderData);
-        console.log("✅ Order created:", createdOrder._id);
+        console.log("✅ Order created:", createdOrder._id, "for user:", orderData.userid);
         res.status(201).json({ message: "Order placed", data: createdOrder });
     } catch (err) {
         console.error("❌ Create order error:", err.message);
@@ -200,5 +235,6 @@ module.exports={
     createOrder,
     getAllOrders,
     createSareDetails,
-    getSareDetails
+    getSareDetails,
+    getuserorderdetails
 }

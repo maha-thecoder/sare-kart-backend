@@ -5,7 +5,7 @@ const bcrypt=require('bcrypt')
 const Loginschema=new mongoose.Schema({
     username:{type:String},
     phone:{type:String},
-    password:{type:String},
+    
 
 })
 
@@ -34,6 +34,7 @@ const DeliveryLocationSchema = new mongoose.Schema({
 const DeliveryLocation = mongoose.model('DeliveryLocation', DeliveryLocationSchema)
 
 const OrderSchema = new mongoose.Schema({
+    userid:{type:String},
     cart: { type: Array, required: true },
     total: { type: Number, required: true },
     deliveryAddress: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryLocation' },
