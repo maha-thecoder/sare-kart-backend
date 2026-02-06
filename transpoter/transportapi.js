@@ -27,7 +27,7 @@ const usercreatepage=async(req,res)=>{
         console.log("✅ User created:", addinguser._id);
 
         // Set cookie BEFORE sending response
-        res.cookie("uid", userfind._id.toString(), {
+        res.cookie("uid", addinguser._id.toString(), {
             httpOnly: true,
             sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
