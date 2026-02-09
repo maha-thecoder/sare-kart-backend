@@ -64,9 +64,16 @@ const SareDetailsSchema = new mongoose.Schema({
 
 const SareDetails = mongoose.model('SareDetails', SareDetailsSchema)
 
+
+const narayanalogin=new mongoose.Schema({
+    rollno:{ type: String, required: true, trim: true }
+})
+
+const clglogin=mongoose.model('clglogin',narayanalogin)
 module.exports = {
     loginsection,
     DeliveryLocation,
     Order,
-    SareDetails
+    SareDetails,
+    clglogin
 }

@@ -1,5 +1,7 @@
 const bcrypt=require("bcrypt")
-const {loginsection, DeliveryLocation, Order, SareDetails}=require("../models/mongomodel")
+const {loginsection, DeliveryLocation, Order, SareDetails,
+    clglogin
+}=require("../models/mongomodel")
 
 
 
@@ -259,6 +261,19 @@ catch(err){
 }
 }
 
+const narayanalogin=async(req,res)=>{
+    try{
+    const {rollno}=req.body
+
+    const addrollno=await clglogin.create({rollno})
+    res.status(200).json({data:addrollno})
+    }
+    catch(err){
+        res.status(500).json({msg:err.message})
+        console.log(err.message)
+    }
+}
+
 module.exports={
     usercreatepage,
     userloginpage,
@@ -268,5 +283,5 @@ module.exports={
     createSareDetails,
     getSareDetails,
     getuserorderdetails,
-    authorization
+    authorization,narayanalogin
 }
