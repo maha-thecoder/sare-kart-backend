@@ -9,7 +9,7 @@ const controller=require("./controller/controller")
 const allowedOrigins = [
   'http://localhost:5173',
   'https://sarekart.vercel.app',
-  'https://narayana-engineering-1sem-results-4459xku4j.vercel.app'
+  'https://narayana-engineering-1sem-results.vercel.app'
 ];
 
 app.use(cors({
